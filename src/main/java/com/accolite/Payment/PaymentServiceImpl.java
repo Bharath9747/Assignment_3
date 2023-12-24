@@ -19,11 +19,11 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired
     private PaymentRepository paymentRepository;
     @Autowired
-    private UsersService usersService;
-
+    private UsersRepository usersRepository;
     @Autowired
-    WalletService walletService;
-
+    private WalletService walletService;
+    @Autowired
+    private WalletRepository walletRepository;
 
     @Override
     public List<PaymentEntity> getAllPayments() {
@@ -35,12 +35,12 @@ public class PaymentServiceImpl implements PaymentService {
         if (payment != null) {
             Long userId = payment.getUserId();
             Long vendorId = payment.getVendorId();
-            UsersEntity userDTO = usersService.getUser(userId);
-            UsersEntity vendorDTO = usersService.getUser(vendorId);
+            UsersEntity userDTO = usersRepository.findById(userId).get();
+            UsersEntity vendorDTO = usersRepository.findById(vendorId).get();
 
             if (userDTO != null && vendorDTO != null) {
-                if (userDTO.getRole().getId() == 3 && vendorDTO.getRole().getId() == 2 && userDTO.getStatus() == 1 && vendorDTO.getStatus() == 1) {
-                    WalletEntity userWallet = walletService.getWallet(userId);
+                if (userDTO.getRole().ordinal() == 2 && vendorDTO.getRole().ordinal() == 1 && userDTO.getStatus() == 1 && vendorDTO.getStatus() == 1) {
+                    WalletEntity userWallet = walletRepository.findById(userId).get();
                     if (userWallet.getStatus() == 1 && userWallet.getAmount()>=payment.getAmount()) {
                         List<Long> uniqueCodes = userWallet.getUniqueCodes();
                         boolean distanceBetweenVendor = checkFlagged(payment, vendorDTO, uniqueCodes, payment.getUniqueCode());

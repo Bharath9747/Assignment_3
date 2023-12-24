@@ -19,5 +19,5 @@ public interface WalletService {
 
     void updateWallet(Long userId, Double amount);
 
-    WalletEntity getWallet(Long userId);
+
 }

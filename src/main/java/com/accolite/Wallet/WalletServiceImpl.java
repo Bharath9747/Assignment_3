@@ -1,6 +1,7 @@
 package com.accolite.Wallet;
 
 import com.accolite.Users.UsersEntity;
+import com.accolite.Users.UsersRepository;
 import com.accolite.Users.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -16,7 +18,7 @@ public class WalletServiceImpl implements WalletService {
     private WalletRepository walletRepository;
 
     @Autowired
-    private UsersService usersService;
+    private UsersRepository usersRepository;
 
 
     @Override
@@ -41,8 +43,8 @@ public class WalletServiceImpl implements WalletService {
     public ResponseEntity<String> addMoney(Long id, Double amount) {
         WalletEntity wallet = walletRepository.findById(id).orElse(null);
         if (wallet != null) {
-            UsersEntity usersEntity = usersService.getUser(id);
-            if (usersEntity.getRole().getId() == 3) {
+            UsersEntity usersEntity = usersRepository.findById(id).get();
+            if (usersEntity.getRole().ordinal() == 2) {
                 if (wallet.getStatus() != 0) {
                     Double newAmount = wallet.getAmount() + amount;
                     wallet.setAmount(newAmount);
@@ -74,8 +76,8 @@ public class WalletServiceImpl implements WalletService {
     public ResponseEntity<String> changePaymentType(Long id) {
         WalletEntity wallet = walletRepository.findById(id).orElse(null);
         if (wallet != null) {
-            UsersEntity usersEntity = usersService.getUser(id);
-            if (usersEntity.getRole().getId() == 3) {
+            UsersEntity usersEntity = usersRepository.findById(id).get();
+            if (usersEntity.getRole().ordinal() == 2) {
                 if (wallet.getStatus() != 0 && wallet.getAmount()>=5000) {
                     Byte paymentType = (byte) (wallet.getPaymentType() == 0 ? 1 : 0);
                     if (paymentType == 0) {
@@ -121,7 +123,7 @@ public class WalletServiceImpl implements WalletService {
     @Override
     public void updateWallet(Long userId, Double amount) {
         WalletEntity userWallet = walletRepository.findById(userId).get();
-        UsersEntity adminEntity = usersService.findAdmin();
+        UsersEntity adminEntity = usersRepository.findAll().stream().filter(x -> x.getRole().ordinal() == 0).collect(Collectors.toList()).stream().findFirst().get();
         WalletEntity adminWallet = walletRepository.findById(adminEntity.getId()).get();
         double adminNewAmount = adminWallet.getAmount() + amount;
         double userNewAmount = userWallet.getAmount() - amount;
@@ -131,10 +133,7 @@ public class WalletServiceImpl implements WalletService {
         walletRepository.save(adminWallet);
     }
 
-    @Override
-    public WalletEntity getWallet(Long userId) {
-        return walletRepository.findById(userId).get();
-    }
+
 
     private Long generateUniqueCode() {
         return new Random().nextLong(100000, 300000);

@@ -13,10 +13,6 @@ public class WalletController {
     @Autowired
     private WalletService walletService;
 
-    @GetMapping("/all")
-    public List<WalletEntity> getAllUser(){
-        return walletService.getAllWalletDetails();
-    }
 
     @GetMapping("/addmoney/{id}/{amount}")
     public ResponseEntity<String> addMoney(@PathVariable Long id,@PathVariable Double amount){

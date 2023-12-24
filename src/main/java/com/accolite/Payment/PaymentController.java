@@ -15,10 +15,6 @@ public class PaymentController {
     @Autowired
     private PaymentService paymentService;
 
-    @GetMapping("/all")
-    public List<PaymentEntity> getAllPayments(){
-        return paymentService.getAllPayments();
-    }
     @PostMapping("/save")
     public ResponseEntity<String> savePayment(@RequestBody PaymentEntity payment) {
         return paymentService.savePayment(payment);
